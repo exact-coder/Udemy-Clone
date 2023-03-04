@@ -26,6 +26,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'courses',
+    'users',
+
+    # third-party apps
+    'rest_framework',
 ]
 
 MIDDLEWARE = [
@@ -113,6 +117,9 @@ STATIC_ROOT=BASE_DIR/'staticfiles'
 STATICFILES_DIRS=[
     BASE_DIR/'static'
 ]
+
+# Auth settings
+AUTH_USER_MODEL='users.User'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
