@@ -18,7 +18,7 @@ class CoursesHomeView(APIView):
                 'sector_name':sector.name,
                 'sector_uuid':sector.sector_uuid,
                 'featured_course':course_serializer.data,
-                'sector_image':sector.get_image_absolute_url,
+                'sector_image':sector.get_image_absolute_url(),
             }
             sector_response.append(sector_obj)
         return Response(data=sector_response,status=status.HTTP_200_OK)

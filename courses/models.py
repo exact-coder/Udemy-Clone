@@ -13,11 +13,11 @@ from mutagen.mp4 import MP4,MP4StreamInfoError
 class Sector(models.Model):
     name = models.CharField(_("Sector Name"), max_length=250)
     sector_uuid = models.UUIDField(_("Sector Unique Id"),default=uuid.uuid4,unique=True)
-    releted_course = models.ManyToManyField("Course", verbose_name=_("Releted Courses"))
+    releted_course = models.ManyToManyField("Course", verbose_name=_("Releted Courses"),blank=True,null=True)
     sector_image = models.ImageField(_("Sector Image"), upload_to="sector_image")
 
     def get_image_absolute_url(self):
-        return 'http://localhost:8000'+self.sector_image # type: ignore
+        return 'http://localhost:8000'+self.sector_image.url
 
 
 class Course(models.Model):
@@ -27,8 +27,8 @@ class Course(models.Model):
     updated = models.DateTimeField(_("Updated"), auto_now=True, auto_now_add=False)
     author = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_("USER"), on_delete=models.CASCADE)
     language = models.CharField(_("Language"), max_length=50)
-    course_section = models.ManyToManyField("CourseSection", verbose_name=_("Course Section"))
-    comments = models.ManyToManyField("Comment", verbose_name=_("Comments"))
+    course_section = models.ManyToManyField("CourseSection", verbose_name=_("Course Section"),null=True,blank=True)
+    comments = models.ManyToManyField("Comment", verbose_name=_("Comments"),blank=True,null=True)
     image_url = models.ImageField(_("Course Image"), upload_to='course_images')
     course_uuid = models.UUIDField(_("Course Unique ID"),default=uuid.uuid4,unique=True)
     price = models.DecimalField(_("Course Price"), max_digits=7, decimal_places=2)
@@ -52,10 +52,13 @@ class Course(models.Model):
             for episode in section.episodes.all():
                 length += episode.length
         return get_timer(length,type='short') # type: ignore
+    
+    def get_absolute_image_url(self):
+        return 'http://localhost:8000'+self.image_url.url
 
 class CourseSection(models.Model):
     section_title = models.CharField(_("Section Title"), max_length=250)
-    episodes = models.ManyToManyField("Episode", verbose_name=_("Episode"))
+    episodes = models.ManyToManyField("Episode", verbose_name=_("Episode"),blank=True,null=True)
 
     def total_length(self):
         total=Decimal(0.0)
@@ -80,7 +83,7 @@ class Episode(models.Model):
         return get_timer(self.length) # type: ignore
     
     def get_absolute_url(self):
-        return 'http://localhost:8000'+self.file # type: ignore
+        return 'http://localhost:8000/'+self.file.url 
     
     def save(self,*args, **kwargs):
         self.length = self.get_video_length()
