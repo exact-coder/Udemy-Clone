@@ -59,6 +59,8 @@ class CourseSectionPaidSerializer(ModelSerializer):
         fields=[
             'section_title','episodes','total_duration'
         ]
+
+
 class CourseUnpaidSerializer(ModelSerializer):
     comments =CommentSerializer(many=True)
     author=UserSerializer()
@@ -111,6 +113,6 @@ class CartItemSerializer(ModelSerializer):
 
 
 
-# no-2,len-1.33min
+
 
 
