@@ -8,6 +8,7 @@ import stripe
 from payments.models import PaymentIntent,Payment
 from decimal import Decimal
 from users.models import User
+from rest_framework.permissions import IsAuthenticated
 
 
 # Create your views here.
@@ -17,6 +18,7 @@ endpoint_secret="whsec_..."
 stripe.api_key=stripe_api_key
 
 class PaymentHandler(APIView):
+    permission_classes=[IsAuthenticated]
     def post(self,request):
         if request.body:
             body=json.loads(request.body)
@@ -91,4 +93,5 @@ class Webhook(APIView):
             return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
-# no-3,len-1.35min
+
+

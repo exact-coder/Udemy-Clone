@@ -28,15 +28,19 @@ INSTALLED_APPS = [
     'courses',
     'users',
     'payments',
+    
 
     # third-party apps
     'rest_framework',
+    'djoser',
+    "corsheaders",
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
+    "corsheaders.middleware.CorsMiddleware",
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -112,17 +116,48 @@ USE_TZ = True
 STATIC_URL = '/static/'
 MEDIA_URL='/media/'
 
+
 MEDIA_ROOT=BASE_DIR/'media'
-STATIC_ROOT=BASE_DIR/'staticfiles'
+STATIC_ROOT=BASE_DIR/'static_root'
 
 STATICFILES_DIRS=[
-    BASE_DIR/'static'
+    BASE_DIR/'static',
 ]
 
 # Auth settings
 AUTH_USER_MODEL='users.User'
 
-# Default primary key field type
-# https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
+DJOSER={
+    'SERIALIZERS':{
+        'user': 'users.serializers.UserAuthSerializer',
+        'current_user': 'users.serializers.UserAuthSerializer'
+        }
+}
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
+
+SIMPLE_JWT = {
+   'AUTH_HEADER_TYPES': ('Token',),
+}
+
+
+CORS_ALLOWED_ORIGINS = [
+    
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+]
+
+
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+

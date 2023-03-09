@@ -7,13 +7,14 @@ from courses.models import *
 from django.http import HttpResponseBadRequest,HttpResponseNotAllowed
 from django.db.models import Q
 import json
-from users.models import User
 from decimal import Decimal
+from rest_framework.permissions import IsAuthenticated
 
 
 
 
 # Create your views here.
+
 class CoursesHomeView(APIView):
     def get(self,request,*args, **kwargs):
         sectors = Sector.objects.order_by('?')[:6]
@@ -68,6 +69,7 @@ class SearchCourse(APIView):
         return Response(data=serializer.data,status=status.HTTP_200_OK)
 
 class AddComment(APIView):
+    permission_classes={IsAuthenticated}
     def post(self,request,course_uuid):
         try:
             course=Course.objects.get(course_uuid=course_uuid)
@@ -85,8 +87,7 @@ class AddComment(APIView):
         serializer=CommentSerializer(data=content)
 
         if serializer.is_valid():
-            author=User.objects.get(id=1)
-            comment=serializer.save(user=author)
+            comment=serializer.save(user=request.user)
             course.comments.add(comment)
             return Response(status=status.HTTP_201_CREATED)
         else:
@@ -121,13 +122,14 @@ class GetCartDetail(APIView):
         },status=status.HTTP_200_OK)
 
 class CourseStudy(APIView):
+    permission_classes=[IsAuthenticated] 
     def get(self,request,course_uuid):
         try:
             course=Course.objects.get(course_uuid=course_uuid)
         except Course.DoesNotExist:
             return HttpResponseBadRequest("Course Does not exist")
         
-        request.user=User.objects.get(id=1)
+        # request.user=User.objects.get(id=1)
         user_course = request.user.paid_courses.filter(course_uuid=course_uuid)
 
         if not user_course:
@@ -136,4 +138,4 @@ class CourseStudy(APIView):
         return Response(serializer.data,status=status.HTTP_200_OK)
 
 
-
+# no-4,len-00min
