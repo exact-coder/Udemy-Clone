@@ -1,36 +1,36 @@
-import { BACKEND_URL } from '@/config/app';
-import React from 'react';
+import {BACKEND_URI} from '../../config/app'
 
 
+export default async(req,res)=>{
+    if (req.method === "POST"){
 
-export default async (req,res)=> {
-  if(req.method === "POST"){
+        const {email,password,name}=req.body 
 
-    const {name,email,password} = req.body
+        const resAPI = await fetch(`${BACKEND_URI}/auth/users/`,{
 
-    const resAPI = await fetch(`${BACKEND_URL}/auth/user/`,{
-      method:"POST",
-      headers:{
-        "content-type":"application/json"
-      },
-      body:JSON.stringify({email,name,password})
-    })
+            method:"POST",
+            headers:{
+                "Content-type":"application/json"
+            },
+            body:JSON.stringify({email,password,name})
+        })
 
-    const data = await resAPI.json()
-    if(resAPI.ok){
-      res.status(200).json(data)
-      return
+        const data= await resAPI.json()
+        
+        
+        if (resAPI.ok){
+            
+            res.status(200).json(data)
+            return
+
+        }else{
+            // send error message
+            res.status(401).json(data)
+            return
+        }
+
     }else{
-      res.status(400).json(data)
-      return
+        res.setHeader("Allow",["POST"])
+        res.status(403).json({"message":`Method  ${req.method} not allowed`})
     }
-
-  }else{
-    res.setHeader("Allowed",["POST"])
-    res.status(400).json({
-      "message":`${req.method} is not Allowed`
-    })
-    return
-  }
-
 }

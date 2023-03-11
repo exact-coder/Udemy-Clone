@@ -1,90 +1,145 @@
-import React,{createContext, useState} from 'react';
-import { NEXT_BACKEND_URL } from '@/config/app';
+import { useRouter } from "next/router";
+import { useState, createContext, useEffect } from "react";
+import {NEXT_BACKEND_URI} from '../config/app'
+import { useSelector, useDispatch } from 'react-redux'
+import {addUser,removeUser} from '../redux/slices/AuthSlices'
 
-const AuthContext= createContext();
+
+const AuthContext = createContext()
+
+export const AuthContextProvider=({children})=>{
+    const user=useSelector(state=>state.auth.user)
+    const [authError,setAuthError]=useState(null)
+    const [authReady,setAuthReady]=useState(false)
+
+    const dispatch=useDispatch()
+
+    
+
+    
 
 
-const AuthContextProvider = ({children}) => {
-    const [user, setUser] = useState(null);
-    const [authError, setAuthError] = useState(null);
-    const [authReady, setAuthReady] = useState(false);
+    const router = useRouter()
 
-    const  signup= async ({email,password,name})=>{
+    useEffect(()=>checkUserLoggedIn(),[])
 
-        const res = await fetch(`${NEXT_BACKEND_URL}/signup`,{
+    const login=async({email,password})=>{
+        const res = await fetch(`${NEXT_BACKEND_URI}/login`,{
+
             method:"POST",
             headers:{
-                "content-type":"application/json"
+                "Content-type":"application/json"
             },
-            body:JSON.stringify({
-                email,password,name
-            })
+            body:JSON.stringify({email,password})
         })
+        
+        const data= await res.json()
+       
 
-        const data = await res.json()
+        if (res.ok){
+            
+            // setUser(data.user)
 
-        if(res.ok){
-            await login({email,password})
+            await checkUserLoggedIn()            
+
+            router.push('/')
+            
         }else{
-            if(data.name){
+            
+            setAuthError(data.detail)
+            
+        }
+
+        
+    }
+
+    const signup=async({email,password,name})=>{
+        const res = await fetch(`${NEXT_BACKEND_URI}/signup`,{
+
+            method:"POST",
+            headers:{
+                "Content-type":"application/json"
+            },
+            body:JSON.stringify({email,password,name})
+        })
+        
+        const data= await res.json()
+
+        if (res.ok){
+            
+            // setUser(data)
+
+            await login({email,password}) 
+
+            
+            
+        }else{
+            if (data.name){
+                
                 setAuthError(data.name[0])
             }else if(data.email){
                 setAuthError(data.email[0])
             }else{
-                setAuthError(data.password.join("\n"))
+                setAuthError(data.password.join('\n'))
             }
+            
         }
+
     }
-    const login= async ()=>{
-        const res = await fetch(`${NEXT_BACKEND_URL}/login`,{
-            method:"POST",
-            headers:{
-                "content-type":"application/json",
-            },
-            body:JSON.stringify({email,password})
+
+    const logout=async()=>{
+        const res= await fetch(`${NEXT_BACKEND_URI}/logout`,{
+            method:"POST"
         })
 
-        const data = await res.json()
-
-        if(res.ok){
-            await checkUserLoggedIn()
-        }else{
-            setAuthError(data.detail)
+        if (res.ok){
+            // setUser(null)
+            // push user if necessary
+            dispatch(removeUser())
         }
     }
-    const logout= async ()=>{
-        const res= await fetch(`${NEXT_BACKEND_URL}/logout`,{
-            method:"POST",
-        })
 
-        if(res.ok){
-            setUser(null)
-        }
-    }
-    const checkUserLoggedIn= async ()=>{
-        const res = await fetch(`${NEXT_BACKEND_URL}/user`,)
+    const checkUserLoggedIn=async()=>{
+        
+        
+            
+            const res = await fetch(`${NEXT_BACKEND_URI}/user`)
 
-        if(res.ok){
-            const data = await res.json()
-            setUser(data.user)
-        }else{
-            setUser(null)
-        }
+
+            
+            
+            
+            if (res.ok){
+                const data= await res.json()
+                dispatch(addUser(data.user))
+                // setUser(data.user)
+               
+            }else{
+                // setUser(null)
+                dispatch(addUser(null))
+    
+                
+            }
+    
+            setAuthReady(true)
+    
+            return 
+        
+        
     }
 
     const clearUser=()=>{
-        setUser(null)
+        
+        dispatch(removeUser())
     }
 
-
     return (
-        <AuthContext.Provider value={{user,authError,login,logout,signup,clearUser,checkUserLoggedIn}}>
-            {authReady & children}
+        <AuthContext.Provider value={{user,authError,login,signup,logout,clearUser}}>
+            {authReady && children}
         </AuthContext.Provider>
     )
 }
 
-export default AuthContextProvider;
 
-// no-4,len-35min
 
+export default AuthContext

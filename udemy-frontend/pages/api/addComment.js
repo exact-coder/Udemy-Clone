@@ -3,11 +3,10 @@ import cookie from 'cookie'
 import refreshToken from "./refresh_token"
 
 export default async(req,res)=>{
-    //console.log('running')
-    if (req.method === "GET"){
-        //console.log(1)
+    if (req.method === "POST"){
+        
         if (!req.headers.cookie){
-            //console.log(2)
+           
             res.status(403).json({"message":"Not authorized"})
             return 
         }
@@ -15,7 +14,7 @@ export default async(req,res)=>{
         let {refresh_token}=cookie.parse(req.headers.cookie)
 
         if (!refresh_token){
-            //console.log(3)
+           
             res.status(403).json({"message":"Not authorized"})
             return 
         }
@@ -26,7 +25,7 @@ export default async(req,res)=>{
 
         if (!access_token){
             const refreshRes= await refreshToken(req,res)
-            //console.log(4)
+            
             
             if(refreshRes){
                 access_token=refreshRes
@@ -40,25 +39,30 @@ export default async(req,res)=>{
             
         }
 
+        const body=JSON.parse(req.body)
+
+       
         
 
-        let resAPI = await fetch(`${BACKEND_URI}/auth/users/me/`,{
-            method:"GET",
+        let resAPI = await fetch(`${BACKEND_URI}/courses/comment/${body.course_uuid}/`,{
+            method:"POST",
             headers:{
                 "Content-type":"application/json",
                 "Authorization": `Token ${access_token}`
             },
+            body:JSON.stringify(body.data)
             
         })
-        //console.log(5)
+
+        
+
         
         if (resAPI.ok){
-            //console.log(6)
-            const user= await resAPI.json()
+            
            
-            // send user in response
-            res.status(200).json({user})
-            return user
+            
+            res.status(200).json({})
+           
 
         }else{
             // send error message
